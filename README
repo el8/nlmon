@@ -1,0 +1,71 @@
+nlmon - netlink based task monitor
+-----------------------------------
+
+Features:
+- netlink based (lower overhead compared to procfs based tools, complete accounting over also for short-lived threads)
+- thread reporting only
+- output modes: text, csv, ncurses
+- reports: cputimes, iotimes, RSS, cpudelay, iodelay
+
+Required kernel configuration options:
+CONFIG_CONNECTOR
+CONFIG_PROC_EVENTS
+CONFIG_TASKSTATS
+CONFIG_TASK_DELAY_ACCT
+CONFIG_TASK_XACCT
+CONFIG_TASK_IO_ACCOUNTING
+
+Not supported features:
+- CPU hotplug and freqency changing
+
+
+CPU data
+=========
+
+Fetched from procfs, see Documentation/filesystems/proc.txt
+
+  > cat /proc/stat
+  cpu  2255 34 2290 22625563 6290 127 456 0 0
+  cpu0 1132 34 1441 11311718 3675 127 438 0 0
+  cpu1 1123 0 849 11313845 2614 0 18 0 0
+  intr 114930548 113199788 3 0 5 263 0 4 [... lots more numbers ...]
+  ctxt 1990473
+  btime 1062191376
+  processes 2915
+  procs_running 1
+  procs_blocked 0
+  softirq 183433 0 21755 12 39 1137 231 21459 2263
+
+The very first  "cpu" line aggregates the  numbers in all  of the other "cpuN"
+lines.  These numbers identify the amount of time the CPU has spent performing
+different kinds of work.  Time units are in USER_HZ (typically hundredths of a
+second).  The meanings of the columns are as follows, from left to right:
+
+- user: normal processes executing in user mode
+- nice: niced processes executing in user mode
+- system: processes executing in kernel mode
+- idle: twiddling thumbs
+- iowait: waiting for I/O to complete
+- irq: servicing interrupts
+- softirq: servicing softirqs
+- steal: involuntary wait
+- guest: running a normal guest
+- guest_nice: running a niced guest
+
+Thread data
+============
+
+TBD.
+
+
+License
+========
+
+GPLv2, see file COPYING.
+
+
+Running as non-root
+===================
+
+One option is to make the binary setuid but be aware that this also requires the binary to belong to root.
+In other words only setting the setuid bit is not sufficient.
