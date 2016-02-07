@@ -127,8 +127,13 @@ static void print_mem_info_ncurses(total, free)
 
 static void init_ncurses(void)
 {
-	int split_size = nr_cpus + 7;
 	int total_x, total_y;
+	int split_size;
+
+	if (opt_all_cpus)
+		split_size = nr_cpus + 7;
+	else
+		split_size = 8;
 
 	initscr();
 	noecho();
