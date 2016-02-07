@@ -18,7 +18,6 @@
 #include "helper.h"
 
 static FILE *cpu_fp;
-static int cpufreq_available;
 
 // TODO: make size a function of nr cpus, enough for 4 CPUs now
 #define CPU_LINE_SIZE 512
@@ -65,23 +64,6 @@ static void parse_cpu_sum_info(char *line, int cpu, struct cpu_usage *now)
 		&now->guest,
 		&now->guest_nice
 		);
-}
-static unsigned long query_cpu_freq(int cpu)
-{
-	char name[80];
-	char buf[16];
-	int fd, rc;
-
-	memset(name, 0, 80);
-	snprintf(name, 80, "/sys/devices/system/cpu/cpu%d/cpufreq/cpuinfo_cur_freq", cpu);
-	fd = open(name, O_RDONLY);
-	if (fd < 0)
-		DIE_PERROR("open cpuinfo_cur_freq failed");
-	rc = read(fd, buf, 16);
-	if (rc < 0)
-		DIE_PERROR("read cpuinfo_cur_freq failed");
-	close(fd);
-	return strtoul(buf, NULL, 10);
 }
 
 /* get CPU summary values out of proc */
@@ -137,10 +119,6 @@ void query_all_cpus(void)
 			continue;
 
 		cpu = line - 1;
-		if (cpufreq_available)
-			now.freq = query_cpu_freq(cpu);
-		else
-			now.freq = 0;
 
 		parse_cpu_info(cpu_buf_ptr, cpu, &now);
 		//if (nr_cycles)
@@ -194,7 +172,7 @@ int get_nr_cpus(void)
 
 void data_init_cpu(void)
 {
-	int i, rc, values = 0;
+	int i, values = 0;
 	char *ptr;
 
 	cpu_fp = fopen("/proc/stat", "r");
@@ -226,9 +204,4 @@ void data_init_cpu(void)
 	cpu_delta = calloc(nr_cpus, sizeof(struct cpu_usage));
 	if (!cpu_delta)
 		DIE_PERROR("malloc failed");
-
-	/* check availability of cpu frequency info */
-	rc = access("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq", R_OK);
-	if (!rc)
-		cpufreq_available = 1;
 }

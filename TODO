@@ -7,11 +7,12 @@ TODO
 
 - add process only view
 
-- used cpu freq scaled values
-
 - check if IO needs to include blkio beside char io
 
 - fix seconds default if milliseconds option is set without seconds
+
+- huge error margin on cpu summary vs. netlink summation, why is netlink ~80% lower
+  (compile with 48 CPUs)
 
 - use CONNECTOR or GENERIC?
   -> Michael uses GENERIC like taskstat example, can get taskstat data per pid

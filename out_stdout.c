@@ -82,15 +82,14 @@ static void print_data_stdout(struct taskstat_delta *delta)
 
 static void print_cpu_info_stdout(int i, struct cpu_usage *delta)
 {
-	printf("CPU%d  [ms]  user: %4u  system: %4u  irq: %4u  softirq: %4u  iowait: %4u  idle: %4u  freq: %8lu\n",
+	printf("CPU%d  [ms]  user: %4u  system: %4u  irq: %4u  softirq: %4u  iowait: %4u  idle: %4u\n",
 		i,
 		delta->user,
 		delta->system,
 		delta->irq,
 		delta->softirq,
 		delta->iowait,
-		delta->idle,
-		delta->freq // XXX broken?
+		delta->idle
 		);
 }
 

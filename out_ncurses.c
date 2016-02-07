@@ -104,14 +104,13 @@ static void print_cpu_info_ncurses(int i, struct cpu_usage *delta)
 		wprintw(cpus, "%d", i);
 	else
 		wprintw(cpus, " ");
-	wprintw(cpus, "  [ms]  user: %4u  system: %4u  irq: %4u  softirq: %4u  iowait: %4u  idle: %4u  freq: %8lu\n",
+	wprintw(cpus, "  [ms]  user: %4u  system: %4u  irq: %4u  softirq: %4u  iowait: %4u  idle: %4u\n",
 		delta->user,
 		delta->system,
 		delta->irq,
 		delta->softirq,
 		delta->iowait,
-		delta->idle,
-		delta->freq // XXX broken?
+		delta->idle
 		);
 
 	// XXX make generic
