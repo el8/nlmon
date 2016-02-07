@@ -48,11 +48,24 @@ static void parse_cpu_info(char *line, int cpu, struct cpu_usage *now)
 		&now->guest,
 		&now->guest_nice
 		);
-
-	if (i != cpu)
-		DIE("wrong cpu");
 }
 
+static void parse_cpu_sum_info(char *line, int cpu, struct cpu_usage *now)
+{
+	/* cpu  2255 34 2290 22625563 6290 127 456 0 0 */
+	sscanf(line, "cpu %u %u %u %u %u %u %u %u %u %u\n",
+		&now->user,
+		&now->nice,
+		&now->system,
+		&now->idle,
+		&now->iowait,
+		&now->irq,
+		&now->softirq,
+		&now->steal,
+		&now->guest,
+		&now->guest_nice
+		);
+}
 static unsigned long query_cpu_freq(int cpu)
 {
 	char name[80];
@@ -71,8 +84,39 @@ static unsigned long query_cpu_freq(int cpu)
 	return strtoul(buf, NULL, 10);
 }
 
+/* get CPU summary values out of proc */
+void query_cpu_summary(void)
+{
+	struct cpu_usage now;
+	ssize_t len;
+	int cpu = 0;
+
+	cpu_fp = fopen("/proc/stat", "r");
+	if (!cpu_fp)
+		DIE_PERROR("open procfs failed");
+
+	len = getline(&cpu_buf_ptr, &cpu_line_size, cpu_fp);
+	if (len < 0)
+		DIE_PERROR("getline failed");
+
+	parse_cpu_sum_info(cpu_buf_ptr, cpu, &now);
+
+	// XXX calc deltas and store in cpu_delta
+	cpu_delta[cpu].user = (now.user - cpu_hist[cpu].user) * 10;
+	cpu_delta[cpu].system = (now.system - cpu_hist[cpu].system) * 10;
+	cpu_delta[cpu].irq = (now.irq - cpu_hist[cpu].irq) * 10;
+	cpu_delta[cpu].softirq = (now.softirq - cpu_hist[cpu].softirq) * 10;
+	cpu_delta[cpu].iowait = (now.iowait - cpu_hist[cpu].iowait) * 10;
+	cpu_delta[cpu].idle = (now.idle - cpu_hist[cpu].idle) * 10;
+
+	/* update cpu values */
+	memcpy(&cpu_hist[cpu], &now, sizeof(now));
+
+	fclose(cpu_fp);
+}
+
 /* get per CPU values out of proc */
-void query_cpus(void)
+void query_all_cpus(void)
 {
 	struct cpu_usage now;
 	ssize_t len;
@@ -116,15 +160,26 @@ void query_cpus(void)
 	fclose(cpu_fp);
 }
 
-void print_cpus(void)
+void query_cpus(int all)
+{
+	if (all)
+		query_all_cpus();
+	else
+		query_cpu_summary();
+}
+
+void print_cpus(int all)
 {
 	int i;
 
 	if (!nr_cycles)
 		return;
 
-	for (i = 0; i < nr_cpus; i++)
-		output->print_cpu_info(i, &cpu_delta[i]);
+	if (all)
+		for (i = 0; i < nr_cpus; i++)
+			output->print_cpu_info(i, &cpu_delta[i]);
+	else
+		output->print_cpu_info(0, &cpu_delta[0]);
 }
 
 /* get the number of configured CPUs, some may be offline */

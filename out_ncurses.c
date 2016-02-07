@@ -99,8 +99,12 @@ static void print_data_ncurses(struct taskstat_delta *delta)
 
 static void print_cpu_info_ncurses(int i, struct cpu_usage *delta)
 {
-	wprintw(cpus, "CPU%d  [ms]  user: %4u  system: %4u  irq: %4u  softirq: %4u  iowait: %4u  idle: %4u  freq: %8lu\n",
-		i,
+	wprintw(cpus, "CPU");
+	if (opt_all_cpus)
+		wprintw(cpus, "%d", i);
+	else
+		wprintw(cpus, " ");
+	wprintw(cpus, "  [ms]  user: %4u  system: %4u  irq: %4u  softirq: %4u  iowait: %4u  idle: %4u  freq: %8lu\n",
 		delta->user,
 		delta->system,
 		delta->irq,

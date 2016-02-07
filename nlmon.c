@@ -32,7 +32,7 @@
 FILE *logfile;
 #endif
 
-static int opt_realtime = 0;
+static int opt_realtime;
 
 /* default intervall is one second */
 struct timespec target = { 1, 0 };
@@ -447,11 +447,11 @@ static void measure_one_cycle(void)
 
 	query_tasks();
 	query_memory();
-	query_cpus();
+	query_cpus(opt_all_cpus);
 
 	print_tasks();
 	print_memory();
-	print_cpus();
+	print_cpus(opt_all_cpus);
 
 	rc = clock_gettime(CLOCK_MONOTONIC, &ts2);
 	if (rc < 0)
@@ -548,6 +548,7 @@ static void print_help(int argc, char* argv[])
 	fprintf(stderr, "  -s <mode> or --sort <mode>\n");
 	fprintf(stderr, "      Modes: id, name, time, io, mem\n");
 	fprintf(stderr, "  --realtime\n");
+	fprintf(stderr, "  --all_cpus\n");
 	fprintf(stderr, "  --seconds <seconds>\n");
 	fprintf(stderr, "  --milliseconds <milliseconds>\n");
 	fprintf(stderr, "  -c <cycles> or --cycles <cycles>\n");
@@ -578,6 +579,7 @@ int main(int argc, char* argv[])
 		int option_index = 0;
 		static struct option long_options[] = {
 			{ "realtime",	no_argument,		&opt_realtime, 1},
+			{ "all_cpus",	no_argument,		&opt_all_cpus, 1},
 			{ "sort",	required_argument,	0,  's'},
 			{ "output",	required_argument,	0,  'o'},
 			{ "seconds",	required_argument,	0,  't' },

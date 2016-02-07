@@ -11,6 +11,8 @@
 
 #define NSECS_PER_MSEC	(1000000UL)
 
+int opt_all_cpus;
+
 struct taskstat_delta {
 	unsigned long long utime;
 	unsigned long long stime;
@@ -95,8 +97,8 @@ extern pthread_t procfs_thread;
 extern atomic_t nr_threads;
 
 /* prototypes */
-void query_cpus(void);
-void print_cpus(void);
+void query_cpus(int);
+void print_cpus(int);
 int get_nr_cpus(void);
 void data_init_cpu(void);
 void query_memory(void);
